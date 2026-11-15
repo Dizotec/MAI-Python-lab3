@@ -13,7 +13,7 @@ def check(value,field)-> None:
 
 
     
-@dataclass
+@dataclass(frozen = True)
 class Detail:
     identifier: str 
     name: str 
