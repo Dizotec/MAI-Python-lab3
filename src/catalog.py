@@ -1,7 +1,10 @@
+from collections.abc import Iterator
+
 from src.detail import Detail
 from src.errors import DuplicateIdError, ItemNotFoundError
-from collections.abc import Iterator
-class Catalog():
+
+
+class Catalog:
 
     def __init__(self)->None:
         self.items: dict[str,Detail] = {}
@@ -24,10 +27,7 @@ class Catalog():
     def __len__(self)->int:
         return len(self.items) 
     def __contains__(self, id)->bool:
-        if id in self.items:
-            return True 
-        else:
-            return False
+        return id in self.items
     def __iter__(self)->Iterator[Detail]:
         return iter(self.items.values())
     def find_by_category(self,category : str) -> list[Detail]:
@@ -44,6 +44,9 @@ class Catalog():
             if name in detail.name.casefold():
                 results.append(detail)
         return results 
+    def replace_with(self, other: "Catalog")->None:
+        self.items = other.items.copy()
+        
 
             
         

@@ -1,8 +1,12 @@
-from src.errors import InvalidDetailError, ItemNotFoundError , DuplicateIdError
-from src.catalog import Catalog 
+from datetime import date
+
+import pytest
+
+from src.catalog import Catalog
 from src.detail import Detail
-from datetime import date 
-import pytest 
+from src.errors import DuplicateIdError, ItemNotFoundError
+
+
 def test_create_catalog()->None:
     catalog = Catalog()
     assert len(catalog) == 0 
@@ -31,7 +35,7 @@ def test_duplicate_detail()->None:
     assert len(catalog) == 1 
 def test_delete_invalid_ID()->None:
     catalog = Catalog()
-    detail = Detail("ART-0042","Шестерня привода 1","Механика",date(2026,11,12),1.45,"Сталь")
+    Detail("ART-0042","Шестерня привода 1","Механика",date(2026,11,12),1.45,"Сталь")
     with pytest.raises(ItemNotFoundError):
         catalog.remove("ART-0067")  
 def test_duplicate_catalogs_check()->None:
@@ -114,7 +118,7 @@ def test_find_by_name_empty_request()->None:
     catalog.add(detail3)
     result = catalog.find_by_name("")
     assert result == [detail1,detail2,detail3]
-def test_find_by_name_independence():
+def test_find_by_name_independence()->None:
     catalog = Catalog()
     detail1 = Detail("ART-0042","Шестерня привода","Механика",date(2026,11,12),1.45,"Сталь")
     detail2 = Detail("ART-0043","Болт крепёжный","Механика",date(2026,11,12),1.45,"Сталь")
@@ -130,7 +134,7 @@ def test_find_by_name_independence():
     assert result == [detail1,detail3]
     assert list(catalog) == [detail1,detail2,detail3]
 
-def test_find_by_category_independence():
+def test_find_by_category_independence()->None:
     catalog = Catalog()
     detail1 = Detail("ART-0042","Шестерня привода","Механика",date(2026,11,12),1.45,"Сталь")
     detail2 = Detail("ART-0043","Болт крепёжный","Механика",date(2026,11,12),1.45,"Сталь")
@@ -145,6 +149,16 @@ def test_find_by_category_independence():
     result = catalog.find_by_category("Механика")
     assert list(catalog) == [detail1,detail2,detail3]
     assert result == [detail1,detail2]
-
+def test_contains()->None:
+   catalog = Catalog()
+   detail1 = Detail("ART-0042","Шестерня привода","Механика",date(2026,11,12),1.45,"Сталь")
+   catalog.add(detail1)
+   assert "ART-0042" in catalog 
+   assert "ART-0043" not in catalog 
+   catalog.remove("ART-0042")
+   assert "ART-0042" not in catalog 
    
+
+
+
     

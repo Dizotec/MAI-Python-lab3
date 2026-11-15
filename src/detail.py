@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from datetime import date 
-from src.errors import InvalidDetailError
+from datetime import date
 from math import isfinite
+
+from src.errors import InvalidDetailError
+
 
 def check(value,field)-> None:
     if not(isinstance(value,str)):
@@ -12,7 +14,7 @@ def check(value,field)-> None:
 
     
 @dataclass
-class Detail():
+class Detail:
     identifier: str 
     name: str 
     category: str 
@@ -24,7 +26,7 @@ class Detail():
         check(self.name,"name")
         check(self.category,"category")
         check(self.material,"material")
-        if not(isinstance(self.mass,int) or isinstance(self.mass,float)) or isinstance(self.mass,bool) or not(isfinite(self.mass)):
+        if not(isinstance(self.mass, (int, float))) or isinstance(self.mass,bool) or not(isfinite(self.mass)):
             raise InvalidDetailError("Mass must be finite int or float number")
         if self.mass <= 0:
             raise InvalidDetailError("Mass must be positive number")

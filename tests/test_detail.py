@@ -1,8 +1,12 @@
-from datetime import date 
+from datetime import date
+from math import inf
+
+import pytest
+
 from src.detail import Detail
 from src.errors import InvalidDetailError
-from math import inf 
-import pytest
+
+
 def test_detail_creation() -> None:
     detail = Detail("ART-0042","Шестерня привода","Механика",date(2026,11,12),1.45,"Сталь")
     assert detail.identifier == "ART-0042"
