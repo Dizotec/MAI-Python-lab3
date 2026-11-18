@@ -15,16 +15,20 @@ from src.errors import (
 from src.storage import load_catalog, load_into_catalog, save_catalog
 
 
-def test_storage(tmp_path:Path)->None:
+def test_storage(tmp_path: Path) -> None:
     catalog = Catalog()
-    detail1 = Detail("ART-0042","Шестерня привода","Механика",date(2026,11,12),1.45,"Сталь")
-    detail2 = Detail("ART-0043","Шестерня ","Гидравлика",date(2026,11,13),1.5,"Медь")
+    detail1 = Detail(
+        "ART-0042", "Шестерня привода", "Механика", date(2026, 11, 12), 1.45, "Сталь"
+    )
+    detail2 = Detail(
+        "ART-0043", "Шестерня ", "Гидравлика", date(2026, 11, 13), 1.5, "Медь"
+    )
     catalog.add(detail1)
     catalog.add(detail2)
     path = tmp_path / "catalog.json"
     save_catalog(catalog, str(path))
-    with open(path,"r",encoding='utf-8') as file:
-        data= json.load(file) 
+    with open(path, "r", encoding="utf-8") as file:
+        data = json.load(file)
         assert data["format_version"] == 1
         assert len(data["items"]) == 2
         assert data["items"][0]["identifier"] == detail1.identifier
@@ -33,13 +37,14 @@ def test_storage(tmp_path:Path)->None:
         assert data["items"][0]["date"] == detail1.date.isoformat()
         assert data["items"][0]["mass"] == detail1.mass
         assert data["items"][0]["material"] == detail1.material
-    
+
         assert data["items"][1]["identifier"] == detail2.identifier
         assert data["items"][1]["name"] == detail2.name
         assert data["items"][1]["category"] == detail2.category
         assert data["items"][1]["date"] == detail2.date.isoformat()
         assert data["items"][1]["mass"] == detail2.mass
         assert data["items"][1]["material"] == detail2.material
+
 
 def test_save_empty_catalog(tmp_path: Path) -> None:
     catalog = Catalog()
@@ -56,8 +61,12 @@ def test_save_empty_catalog(tmp_path: Path) -> None:
 
 def test_save_preserves_original_data(tmp_path: Path) -> None:
     catalog = Catalog()
-    detail1 = Detail("ART-0042", "Шестерня привода", "Механика",date(2026, 11, 12), 1.45, "Сталь")
-    detail2 = Detail( "ART-0043", "Шестерня насоса", "Гидравлика",date(2026, 11, 13), 1.5, "Медь")
+    detail1 = Detail(
+        "ART-0042", "Шестерня привода", "Механика", date(2026, 11, 12), 1.45, "Сталь"
+    )
+    detail2 = Detail(
+        "ART-0043", "Шестерня насоса", "Гидравлика", date(2026, 11, 13), 1.5, "Медь"
+    )
     catalog.add(detail1)
     catalog.add(detail2)
 
@@ -77,16 +86,23 @@ def test_save_preserves_original_data(tmp_path: Path) -> None:
     assert isinstance(detail2.date, date)
 
 
-
 def test_catalog_json_round_trip(tmp_path: Path) -> None:
     catalog = Catalog()
     detail1 = Detail(
-        "ART-0042", "Шестерня привода", "Механика",
-        date(2026, 11, 12), 1.45, "Сталь",
+        "ART-0042",
+        "Шестерня привода",
+        "Механика",
+        date(2026, 11, 12),
+        1.45,
+        "Сталь",
     )
     detail2 = Detail(
-        "ART-0043", "Шестерня насоса", "Гидравлика",
-        date(2026, 11, 13), 1.5, "Медь",
+        "ART-0043",
+        "Шестерня насоса",
+        "Гидравлика",
+        date(2026, 11, 13),
+        1.5,
+        "Медь",
     )
     catalog.add(detail1)
     catalog.add(detail2)
@@ -111,78 +127,108 @@ def test_load_empty_catalog(tmp_path: Path) -> None:
 
     assert isinstance(loaded, Catalog)
     assert len(loaded) == 0
-def test_load_corrupted_json(tmp_path:Path)->None:
-    path = tmp_path / "corrupted.json" 
-    with open(path,"w",encoding="utf-8") as file:
+
+
+def test_load_corrupted_json(tmp_path: Path) -> None:
+    path = tmp_path / "corrupted.json"
+    with open(path, "w", encoding="utf-8") as file:
         file.write("{")
     with pytest.raises(CorruptedFileError):
         load_catalog(path)
-def test_load_unsupported_version(tmp_path:Path) -> None:
-    path = tmp_path / "corrupted.json" 
-    test_record = {"format_version":99, "items" : []}
-    with open(path,"w",encoding="utf-8") as file :
-        json.dump(test_record,file)
+
+
+def test_load_unsupported_version(tmp_path: Path) -> None:
+    path = tmp_path / "corrupted.json"
+    test_record = {"format_version": 99, "items": []}
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(test_record, file)
     with pytest.raises(UnsupportedFormatVersionError):
-        load_catalog(path) 
-def test_load_invalid_mass(tmp_path:Path)-> None:
+        load_catalog(path)
+
+
+def test_load_invalid_mass(tmp_path: Path) -> None:
     catalog = Catalog()
     detail1 = Detail(
-        "ART-0042", "Шестерня привода", "Механика",
-        date(2026, 11, 12), 1.45, "Сталь",
+        "ART-0042",
+        "Шестерня привода",
+        "Механика",
+        date(2026, 11, 12),
+        1.45,
+        "Сталь",
     )
     catalog.add(detail1)
     path = tmp_path / "invalid_mass.json"
-    save_catalog(catalog,str(path)) 
-    
-    with open(path,"r",encoding = "utf-8") as file: 
+    save_catalog(catalog, str(path))
+
+    with open(path, "r", encoding="utf-8") as file:
         data = json.load(file)
-        data["items"][0]["mass"] = -10 
-    with open(path,"w",encoding = "utf-8")as file :
-        json.dump(data,file)
+        data["items"][0]["mass"] = -10
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file)
     with pytest.raises(CorruptedFileError):
         load_catalog(str(path))
-def test_load_duplicate_id(tmp_path:Path)->None:
+
+
+def test_load_duplicate_id(tmp_path: Path) -> None:
     catalog = Catalog()
     detail1 = Detail(
-        "ART-0042", "Шестерня привода", "Механика",
-        date(2026, 11, 12), 1.45, "Сталь",
+        "ART-0042",
+        "Шестерня привода",
+        "Механика",
+        date(2026, 11, 12),
+        1.45,
+        "Сталь",
     )
     detail2 = Detail(
-        "ART-0043", "Шестерня привода", "Механика",
-        date(2026, 11, 12), 1.45, "Сталь",
+        "ART-0043",
+        "Шестерня привода",
+        "Механика",
+        date(2026, 11, 12),
+        1.45,
+        "Сталь",
     )
     catalog.add(detail1)
     catalog.add(detail2)
     path = tmp_path / "duplicate_id.json"
-    save_catalog(catalog,str(path))
-    
-    with open(path,"r",encoding='utf-8') as file :
+    save_catalog(catalog, str(path))
+
+    with open(path, "r", encoding="utf-8") as file:
         data = json.load(file)
-        data["items"][1]["identifier"] = "ART-0042"  
-    with open(path,"w",encoding='utf-8') as file :
-        json.dump(data,file)
+        data["items"][1]["identifier"] = "ART-0042"
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file)
     with pytest.raises(CorruptedFileError):
         load_catalog(str(path))
-
-
 
 
 def test_load_into_catalog_adds_contents(tmp_path: Path) -> None:
     current = Catalog()
     old_detail = Detail(
-        "OLD", "Старая деталь", "Механика",
-        date(2026, 11, 10), 1.0, "Сталь",
+        "OLD",
+        "Старая деталь",
+        "Механика",
+        date(2026, 11, 10),
+        1.0,
+        "Сталь",
     )
     current.add(old_detail)
 
     source = Catalog()
     detail_b = Detail(
-        "B", "Шестерня", "Механика",
-        date(2026, 11, 11), 1.5, "Сталь",
+        "B",
+        "Шестерня",
+        "Механика",
+        date(2026, 11, 11),
+        1.5,
+        "Сталь",
     )
     detail_c = Detail(
-        "C", "Болт", "Крепёж",
-        date(2026, 11, 12), 0.1, "Медь",
+        "C",
+        "Болт",
+        "Крепёж",
+        date(2026, 11, 12),
+        0.1,
+        "Медь",
     )
     source.add(detail_b)
     source.add(detail_c)
@@ -200,8 +246,12 @@ def test_load_into_catalog_adds_contents(tmp_path: Path) -> None:
 def test_load_empty_file_preserves_contents(tmp_path: Path) -> None:
     current = Catalog()
     old_detail = Detail(
-        "OLD", "Старая деталь", "Механика",
-        date(2026, 11, 10), 1.0, "Сталь",
+        "OLD",
+        "Старая деталь",
+        "Механика",
+        date(2026, 11, 10),
+        1.0,
+        "Сталь",
     )
     current.add(old_detail)
 
@@ -216,23 +266,35 @@ def test_load_empty_file_preserves_contents(tmp_path: Path) -> None:
     assert current.get("OLD") is old_detail
 
 
-def test_load_into_catalog_preserves_state_on_error( tmp_path: Path) -> None:
+def test_load_into_catalog_preserves_state_on_error(tmp_path: Path) -> None:
     current = Catalog()
     old_detail = Detail(
-        "OLD", "Старая деталь", "Механика",
-        date(2026, 11, 10), 1.0, "Сталь",
+        "OLD",
+        "Старая деталь",
+        "Механика",
+        date(2026, 11, 10),
+        1.0,
+        "Сталь",
     )
     current.add(old_detail)
     original_data = asdict(old_detail)
 
     source = Catalog()
     detail_b = Detail(
-        "B", "Шестерня", "Механика",
-        date(2026, 11, 11), 1.5, "Сталь",
+        "B",
+        "Шестерня",
+        "Механика",
+        date(2026, 11, 11),
+        1.5,
+        "Сталь",
     )
     detail_c = Detail(
-        "C", "Болт", "Крепёж",
-        date(2026, 11, 12), 0.1, "Медь",
+        "C",
+        "Болт",
+        "Крепёж",
+        date(2026, 11, 12),
+        0.1,
+        "Медь",
     )
     source.add(detail_b)
     source.add(detail_c)
@@ -259,24 +321,35 @@ def test_load_into_catalog_preserves_state_on_error( tmp_path: Path) -> None:
     assert "C" not in current
 
 
-
 def test_load_into_catalog_preserves_state_on_id_conflict(tmp_path: Path) -> None:
     current = Catalog()
     old_detail = Detail(
-        "OLD", "Исходная деталь", "Механика",
-        date(2026, 11, 10), 1.0, "Сталь",
+        "OLD",
+        "Исходная деталь",
+        "Механика",
+        date(2026, 11, 10),
+        1.0,
+        "Сталь",
     )
     current.add(old_detail)
     original_data = asdict(old_detail)
 
     source = Catalog()
     detail_b = Detail(
-        "B", "Шестерня", "Механика",
-        date(2026, 11, 11), 1.5, "Сталь",
+        "B",
+        "Шестерня",
+        "Механика",
+        date(2026, 11, 11),
+        1.5,
+        "Сталь",
     )
     conflicting_detail = Detail(
-        "OLD", "Другая деталь", "Гидравлика",
-        date(2026, 11, 12), 2.0, "Медь",
+        "OLD",
+        "Другая деталь",
+        "Гидравлика",
+        date(2026, 11, 12),
+        2.0,
+        "Медь",
     )
     source.add(detail_b)
     source.add(conflicting_detail)
@@ -293,11 +366,16 @@ def test_load_into_catalog_preserves_state_on_id_conflict(tmp_path: Path) -> Non
     assert asdict(old_detail) == original_data
     assert "B" not in current
 
+
 def test_replace_with_uses_independent_storage() -> None:
     source = Catalog()
     detail = Detail(
-        "ART-0042", "Шестерня", "Механика",
-        date(2026, 11, 12), 1.45, "Сталь",
+        "ART-0042",
+        "Шестерня",
+        "Механика",
+        date(2026, 11, 12),
+        1.45,
+        "Сталь",
     )
     source.add(detail)
 
@@ -309,3 +387,35 @@ def test_replace_with_uses_independent_storage() -> None:
     assert len(source) == 0
     assert len(target) == 1
     assert target.get(detail.identifier) is detail
+
+
+def test_load_invalid_utf8(tmp_path: Path) -> None:
+    path = tmp_path / "invalid_utf8.json"
+    path.write_bytes(b"\xff")
+
+    with pytest.raises(CorruptedFileError):
+        load_catalog(str(path))
+
+
+def test_large_integer_mass_json_round_trip(tmp_path: Path) -> None:
+    mass = 10**1000
+    detail = Detail(
+        "LARGE-0001",
+        "Тестовая деталь",
+        "Механика",
+        date(2026, 11, 12),
+        mass,
+        "Сталь",
+    )
+    catalog = Catalog()
+    catalog.add(detail)
+    path = tmp_path / "large_mass.json"
+
+    save_catalog(catalog, str(path))
+    loaded = load_catalog(str(path))
+    restored = loaded.get(detail.identifier)
+
+    assert len(loaded) == 1
+    assert list(loaded) == [detail]
+    assert isinstance(restored.mass, int)
+    assert restored.mass == mass

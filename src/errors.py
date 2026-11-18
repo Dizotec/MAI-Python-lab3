@@ -1,12 +1,22 @@
 class CatalogError(Exception):
-    pass 
+    pass
+
+
 class InvalidDetailError(CatalogError):
-    pass 
+    pass
+
+
 class DuplicateIdError(CatalogError):
-    pass 
+    pass
+
+
 class ItemNotFoundError(CatalogError):
-    pass 
+    pass
+
+
 class UnsupportedFormatVersionError(CatalogError):
-    pass 
+    pass
+
+
 class CorruptedFileError(CatalogError):
-    pass 
+    pass
